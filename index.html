@@ -570,11 +570,46 @@ function loadEmployees(){
     const employeeSelect =
         document.getElementById("name");
 
-    employeeSelect.disabled = true;
+    const cacheKey =
+        "pointOneEmployees";
 
-    employeeSelect.innerHTML =
-        '<option value="">Loading Employees...</option>';
+    /*
+     * Show the last saved employee list immediately.
+     * This removes the visible waiting time on repeat visits.
+     */
+    let cachedNames = [];
 
+    try{
+
+        cachedNames = JSON.parse(
+            localStorage.getItem(cacheKey) || "[]"
+        );
+
+    }catch(error){
+
+        cachedNames = [];
+    }
+
+    if(
+        Array.isArray(cachedNames) &&
+        cachedNames.length > 0
+    ){
+
+        renderEmployeeOptions(
+            cachedNames
+        );
+
+    }else{
+
+        employeeSelect.disabled = true;
+
+        employeeSelect.innerHTML =
+            '<option value="">Loading Employees...</option>';
+    }
+
+    /*
+     * Refresh silently from Apps Script.
+     */
     const formData =
         new URLSearchParams();
 
@@ -591,8 +626,10 @@ function loadEmployees(){
     .then(function(response){
 
         if(!response.ok){
+
             throw new Error(
-                "Server error " + response.status
+                "Server error " +
+                response.status
             );
         }
 
@@ -603,81 +640,109 @@ function loadEmployees(){
         let names;
 
         try{
+
             names = JSON.parse(text);
+
         }catch(error){
+
             throw new Error(
                 "Invalid employee-list response."
             );
         }
 
         if(!Array.isArray(names)){
+
             throw new Error(
                 "Employee list is unavailable."
             );
         }
 
-        /*
-         * Remove blanks and duplicate names,
-         * then arrange them alphabetically.
-         */
         names = names
             .map(function(name){
-                return String(name || "").trim();
+
+                return String(
+                    name || ""
+                ).trim();
+
             })
             .filter(function(name){
+
                 return name !== "";
             });
 
         names = Array.from(
             new Set(names)
         ).sort(function(a, b){
+
             return a.localeCompare(b);
         });
 
-        employeeSelect.innerHTML =
-            '<option value="">SELECT EMPLOYEE</option>';
+        localStorage.setItem(
+            cacheKey,
+            JSON.stringify(names)
+        );
 
-        names.forEach(function(name){
+        renderEmployeeOptions(
+            names
+        );
 
-            const option =
-                document.createElement("option");
+    })
+    .catch(function(error){
 
-            option.value = name;
-            option.textContent = name;
-
-            employeeSelect.appendChild(option);
-        });
-
-        employeeSelect.disabled = false;
-
-        if(names.length === 0){
+        /*
+         * Keep cached names available when the
+         * server is temporarily slow or offline.
+         */
+        if(
+            !Array.isArray(cachedNames) ||
+            cachedNames.length === 0
+        ){
 
             employeeSelect.innerHTML =
-                '<option value="">NO EMPLOYEES FOUND</option>';
+                '<option value="">UNABLE TO LOAD EMPLOYEES</option>';
 
             employeeSelect.disabled = true;
 
             showStatus(
-                "❌ No employee names found in the Employees sheet.",
+                "❌ Unable to load employees. " +
+                error.message,
                 "#E53935",
                 6000
             );
         }
-    })
-    .catch(function(error){
+    });
+}
 
-        employeeSelect.innerHTML =
-            '<option value="">UNABLE TO LOAD EMPLOYEES</option>';
 
-        employeeSelect.disabled = true;
+function renderEmployeeOptions(names){
 
-        showStatus(
-            "❌ Unable to load employees. " +
-            error.message,
-            "#E53935",
-            6000
+    const employeeSelect =
+        document.getElementById("name");
+
+    employeeSelect.innerHTML =
+        '<option value="">SELECT EMPLOYEE</option>';
+
+    names.forEach(function(name){
+
+        const option =
+            document.createElement("option");
+
+        option.value = name;
+        option.textContent = name;
+
+        employeeSelect.appendChild(
+            option
         );
     });
+
+    employeeSelect.disabled =
+        names.length === 0;
+
+    if(names.length === 0){
+
+        employeeSelect.innerHTML =
+            '<option value="">NO EMPLOYEES FOUND</option>';
+    }
 }
 
 
