@@ -609,7 +609,7 @@ function loadSelfie(event){
 
         image.onload = function(){
 
-            const maxSize = 800;
+            const maxSize = 500;
 
             let width = image.width;
             let height = image.height;
@@ -635,8 +635,8 @@ function loadSelfie(event){
 
             context.drawImage(image, 0, 0, width, height);
 
-            imageData = canvas.toDataURL("image/jpeg", 0.75);
-
+            imageData = canvas.toDataURL("image/jpeg", 0.55);
+            
             document.getElementById("selfiePreview").src = imageData;
 
             document.getElementById(
@@ -988,9 +988,9 @@ function submitData(){
         },
 
         {
-            enableHighAccuracy:true,
-            timeout:15000,
-            maximumAge:0
+    enableHighAccuracy:true,
+    timeout:10000,
+    maximumAge:30000
         }
 
     );
