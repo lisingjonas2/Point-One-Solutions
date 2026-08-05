@@ -480,22 +480,8 @@ img{
 
 
 
-<select id="name">
-
-<option value="">SELECT EMPLOYEE</option>
-
-<option value="Jonas Lising">Jonas Lising</option>
-
-<option value="Jia De Dios">Jia De Dios</option>
-
-<option value="John John">John John</option>
-
-<option value="Sophia Lorraine Borja">Sophia Lorraine Borja</option>
-
-<option value="Jim Baugan">Jim Baugan</option>
-
-<option value="Joshua Lising">Joshua Lising</option>
-
+<select id="name" disabled>
+    <option value="">Loading Employees...</option>
 </select>
 
 <div id="statusLoading" style="display:none; margin:10px 0; color:#666; font-size:14px; font-weight:bold; text-align:center;">
@@ -571,6 +557,128 @@ let cachedPositionTime = 0;
 
 const SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbxevqBXcetSpjy8YgJOh4RC20-myu3lgipaSOVZBYFt0naSYbliRkfdp37Jt7McR5ffaw/exec";
+
+// ======================================================
+// LOAD EMPLOYEES FROM GOOGLE SHEET
+// ======================================================
+
+window.addEventListener("load", loadEmployees);
+
+function loadEmployees(){
+
+    const employeeSelect =
+        document.getElementById("name");
+
+    employeeSelect.disabled = true;
+
+    employeeSelect.innerHTML =
+        '<option value="">Loading Employees...</option>';
+
+    const formData =
+        new URLSearchParams();
+
+    formData.append(
+        "action",
+        "getEmployees"
+    );
+
+    fetch(SCRIPT_URL, {
+        method:"POST",
+        body:formData,
+        redirect:"follow"
+    })
+    .then(function(response){
+
+        if(!response.ok){
+            throw new Error(
+                "Server error " + response.status
+            );
+        }
+
+        return response.text();
+    })
+    .then(function(text){
+
+        let names;
+
+        try{
+            names = JSON.parse(text);
+        }catch(error){
+            throw new Error(
+                "Invalid employee-list response."
+            );
+        }
+
+        if(!Array.isArray(names)){
+            throw new Error(
+                "Employee list is unavailable."
+            );
+        }
+
+        /*
+         * Remove blanks and duplicate names,
+         * then arrange them alphabetically.
+         */
+        names = names
+            .map(function(name){
+                return String(name || "").trim();
+            })
+            .filter(function(name){
+                return name !== "";
+            });
+
+        names = Array.from(
+            new Set(names)
+        ).sort(function(a, b){
+            return a.localeCompare(b);
+        });
+
+        employeeSelect.innerHTML =
+            '<option value="">SELECT EMPLOYEE</option>';
+
+        names.forEach(function(name){
+
+            const option =
+                document.createElement("option");
+
+            option.value = name;
+            option.textContent = name;
+
+            employeeSelect.appendChild(option);
+        });
+
+        employeeSelect.disabled = false;
+
+        if(names.length === 0){
+
+            employeeSelect.innerHTML =
+                '<option value="">NO EMPLOYEES FOUND</option>';
+
+            employeeSelect.disabled = true;
+
+            showStatus(
+                "❌ No employee names found in the Employees sheet.",
+                "#E53935",
+                6000
+            );
+        }
+    })
+    .catch(function(error){
+
+        employeeSelect.innerHTML =
+            '<option value="">UNABLE TO LOAD EMPLOYEES</option>';
+
+        employeeSelect.disabled = true;
+
+        showStatus(
+            "❌ Unable to load employees. " +
+            error.message,
+            "#E53935",
+            6000
+        );
+    });
+}
+
 
 let currentEmployeeStatus = null;
 
