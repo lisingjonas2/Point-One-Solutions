@@ -832,6 +832,22 @@ function submitData(){
 
                 switch(attendance){
 
+                        setTimeout(function(){
+
+    document.getElementById("name").selectedIndex = 0;
+
+    document.getElementById("attendance").selectedIndex = 0;
+
+    removeSelfie();
+
+    document.getElementById("selfieContainer").style.display = "block";
+
+    document.getElementById("selfieInfo").style.display = "none";
+
+}, 2500);
+
+return;
+
                     case "TIME IN":
 
                         showStatus(
