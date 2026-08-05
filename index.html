@@ -805,6 +805,52 @@ function checkEmployeeStatus(name){
     });
 }
 
+function applySuccessfulAction(action){
+
+    if(!currentEmployeeStatus){
+        return;
+    }
+
+    const now = new Date().toLocaleTimeString("en-US");
+
+    if(action === "TIME IN"){
+        currentEmployeeStatus.timeIn = true;
+        currentEmployeeStatus.timeInTime = now;
+        currentEmployeeStatus.nextActions = [
+            "LUNCH OUT",
+            "TIME OUT"
+        ];
+    }
+
+    if(action === "LUNCH OUT"){
+        currentEmployeeStatus.lunchOut = true;
+        currentEmployeeStatus.lunchOutTime = now;
+        currentEmployeeStatus.nextActions = [
+            "LUNCH IN",
+            "TIME OUT"
+        ];
+    }
+
+    if(action === "LUNCH IN"){
+        currentEmployeeStatus.lunchIn = true;
+        currentEmployeeStatus.lunchInTime = now;
+        currentEmployeeStatus.nextActions = [
+            "TIME OUT"
+        ];
+    }
+
+    if(action === "TIME OUT"){
+        currentEmployeeStatus.timeOut = true;
+        currentEmployeeStatus.timeOutTime = now;
+        currentEmployeeStatus.completed = true;
+        currentEmployeeStatus.nextActions = [];
+    }
+
+    updateAttendanceOptions(
+        currentEmployeeStatus
+    );
+}
+
 function updateAttendanceOptions(data){
 
     const attendanceSelect =
@@ -922,8 +968,8 @@ function loadSelfie(event){
      * Smaller image = faster upload to Apps Script and Google Drive.
      * Natural orientation is preserved; no mirror/flip is applied.
      */
-    const maxSize = 420;
-    const jpegQuality = 0.50;
+    const maxSize = 360;
+    const jpegQuality = 0.45;
 
     function processImage(image){
 
@@ -997,7 +1043,7 @@ function loadSelfie(event){
                 status.innerHTML = "";
             }
 
-        }, 1800);
+        }, 1200);
     }
 
     /*
@@ -1163,7 +1209,7 @@ function getFastLocation(onSuccess, onError){
      */
     if(
         cachedPosition &&
-        (now - cachedPositionTime) <= 30000
+        (now - cachedPositionTime) <= 60000
     ){
         onSuccess(cachedPosition);
         return;
@@ -1183,8 +1229,8 @@ function getFastLocation(onSuccess, onError){
 
         {
             enableHighAccuracy:true,
-            timeout:8000,
-            maximumAge:30000
+            timeout:7000,
+            maximumAge:60000
         }
     );
 }
@@ -1388,13 +1434,11 @@ function submitData(){
 
                     removeSelfie();
 
-                    document.getElementById(
-                        "attendance"
-                    ).selectedIndex = 0;
+                    applySuccessfulAction(
+                        attendance
+                    );
 
-                    checkEmployeeStatus(name);
-
-                }, 1800);
+                }, 900);
 
             })
 
