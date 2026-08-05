@@ -436,61 +436,6 @@ img{
 }
 
 
-/* =======================
-   EMPLOYEE STATUS CARD
-======================= */
-
-#employeeStatusCard{
-    display:none;
-    margin:12px 0 14px;
-    padding:14px;
-    border:2px solid #D4AF37;
-    border-radius:14px;
-    background:#FFFDF5;
-    text-align:left;
-}
-
-#employeeStatusTitle{
-    margin:0 0 8px;
-    color:#203864;
-    font-size:16px;
-    font-weight:bold;
-    text-align:center;
-}
-
-.status-row{
-    display:flex;
-    justify-content:space-between;
-    gap:12px;
-    padding:6px 0;
-    border-bottom:1px solid #EEE;
-    color:#444;
-    font-size:14px;
-}
-
-.status-row:last-child{
-    border-bottom:none;
-}
-
-.status-row strong{
-    color:#203864;
-}
-
-#statusLoading{
-    display:none;
-    margin:10px 0;
-    color:#666;
-    font-size:14px;
-    font-weight:bold;
-    text-align:center;
-}
-
-#attendance:disabled{
-    background:#F2F2F2;
-    color:#777;
-    cursor:not-allowed;
-}
-
 </style>
 
 </head>
@@ -540,43 +485,15 @@ img{
 <option value="">SELECT EMPLOYEE</option>
 
 <option value="Jonas Lising">Jonas Lising</option>
-    
-<option value="Jia De Dios">Jia De Dios</option>
 
-<option value="Sophia lorraine">Sophia lorraine</option>
-    
 <option value="Jim Baugan">Jim Baugan</option>
 
 <option value="Joshua Lising">Joshua Lising</option>
 
 </select>
 
-<div id="statusLoading">
-    ⏳ Checking today's attendance...
-</div>
-
-<div id="employeeStatusCard">
-    <div id="employeeStatusTitle">Today's Attendance</div>
-
-    <div class="status-row">
-        <span>🟢 TIME IN</span>
-        <strong id="timeInStatus">Not yet</strong>
-    </div>
-
-    <div class="status-row">
-        <span>🍽️ LUNCH OUT</span>
-        <strong id="lunchOutStatus">Not yet</strong>
-    </div>
-
-    <div class="status-row">
-        <span>🍴 LUNCH IN</span>
-        <strong id="lunchInStatus">Not yet</strong>
-    </div>
-
-    <div class="status-row">
-        <span>🔴 TIME OUT</span>
-        <strong id="timeOutStatus">Not yet</strong>
-    </div>
+<div id="statusLoading" style="display:none; margin:10px 0; color:#666; font-size:14px; font-weight:bold; text-align:center;">
+    ⏳ Checking attendance...
 </div>
 
 <select id="attendance" disabled>
@@ -680,10 +597,6 @@ function resetAttendanceUI(){
     attendanceSelect.disabled = true;
 
     document.getElementById(
-        "employeeStatusCard"
-    ).style.display = "none";
-
-    document.getElementById(
         "statusLoading"
     ).style.display = "none";
 
@@ -762,7 +675,6 @@ function checkEmployeeStatus(name){
 
         currentEmployeeStatus = data;
 
-        updateStatusCard(data);
         updateAttendanceOptions(data);
 
     })
@@ -777,51 +689,6 @@ function checkEmployeeStatus(name){
             6000
         );
     });
-}
-
-function updateStatusCard(data){
-
-    const card =
-        document.getElementById(
-            "employeeStatusCard"
-        );
-
-    document.getElementById(
-        "employeeStatusTitle"
-    ).innerHTML =
-        data.completed
-            ? "✅ Attendance Completed Today"
-            : "Today's Attendance";
-
-    document.getElementById(
-        "timeInStatus"
-    ).innerHTML =
-        data.timeIn
-            ? "✅ " + data.timeInTime
-            : "Not yet";
-
-    document.getElementById(
-        "lunchOutStatus"
-    ).innerHTML =
-        data.lunchOut
-            ? "✅ " + data.lunchOutTime
-            : "Not yet";
-
-    document.getElementById(
-        "lunchInStatus"
-    ).innerHTML =
-        data.lunchIn
-            ? "✅ " + data.lunchInTime
-            : "Not yet";
-
-    document.getElementById(
-        "timeOutStatus"
-    ).innerHTML =
-        data.timeOut
-            ? "✅ " + data.timeOutTime
-            : "Not yet";
-
-    card.style.display = "block";
 }
 
 function updateAttendanceOptions(data){
@@ -847,7 +714,7 @@ function updateAttendanceOptions(data){
         ).style.display = "none";
 
         showStatus(
-            "✅ Your attendance is already completed today.",
+            "✅ Attendance completed today.",
             "#28A745",
             5000
         );
