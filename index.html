@@ -3,10 +3,11 @@
 
 <head>
 
-<link rel="icon" type="image/png" href="favicon.png">    
-    
 <meta name="viewport"
 content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>Point One Solutions Attendance</title>
+<link rel="icon" type="image/png" href="favicon.png">
 
 <style>
 
@@ -384,12 +385,106 @@ h1{
 }
 
 
+
+/* =======================
+   SELFIE PREVIEW
+======================= */
+
+#selfiePreviewContainer{
+    display:none;
+    margin-top:15px;
+    padding:12px;
+    background:#F8F8F8;
+    border:2px solid #D4AF37;
+    border-radius:14px;
+    text-align:center;
+}
+
+#selfiePreview{
+    width:100%;
+    max-width:280px;
+    max-height:280px;
+    object-fit:cover;
+    border-radius:12px;
+    display:block;
+    margin:0 auto;
+}
+
+#selfiePreviewContainer p{
+    margin:10px 0 0;
+    color:#555;
+    font-size:13px;
+    font-weight:bold;
+}
+
+/* =======================
+   LOADING OVERLAY
+======================= */
+
+#loadingOverlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    background:rgba(0,0,0,.72);
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.loading-box{
+    width:100%;
+    max-width:300px;
+    padding:28px 20px;
+    background:#FFF;
+    border:3px solid #D4AF37;
+    border-radius:20px;
+    text-align:center;
+}
+
+.spinner{
+    width:48px;
+    height:48px;
+    margin:0 auto 18px;
+    border:6px solid #E0E0E0;
+    border-top-color:#D4AF37;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+
+.loading-box strong{
+    display:block;
+    color:#333;
+    font-size:17px;
+}
+
+.loading-box small{
+    display:block;
+    margin-top:8px;
+    color:#777;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
 </style>
 
 </head>
 
 
 <body>
+
+<div id="loadingOverlay">
+    <div class="loading-box">
+        <div class="spinner"></div>
+        <strong id="loadingText">Processing attendance...</strong>
+        <small>Please do not close or refresh this page.</small>
+    </div>
+</div>
+
 
 <div class="card">
 
@@ -483,6 +578,12 @@ style="display:none;">
 
 <span id="fileName">No selfie selected</span>
 
+<div id="selfiePreviewContainer">
+    <img id="selfiePreview" alt="Selfie Preview">
+    <p>Selfie Preview</p>
+</div>
+
+
 <button
 type="button"
 id="removeSelfie"
@@ -514,35 +615,31 @@ SUBMIT ATTENDANCE
 <script>
 
 let imageData = "";
+let isSubmitting = false;
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxevqBXcetSpjy8YgJOh4RC20-myu3lgipaSOVZBYFt0naSYbliRkfdp37Jt7McR5ffaw/exec";    
+"https://script.google.com/macros/s/AKfycbxevqBXcetSpjy8YgJOh4RC20-myu3lgipaSOVZBYFt0naSYbliRkfdp37Jt7McR5ffaw/exec";
 
-document.getElementById("attendance").addEventListener("change",function(){
+document.getElementById("attendance").addEventListener("change", function(){
 
     const selfieContainer =
-    document.getElementById("selfieContainer");
+        document.getElementById("selfieContainer");
 
     const selfieInfo =
-    document.getElementById("selfieInfo");
+        document.getElementById("selfieInfo");
 
-    document.getElementById("status").innerHTML="";
+    document.getElementById("status").innerHTML = "";
 
-    if(this.value=="LUNCH IN" || this.value=="LUNCH OUT"){
+    if(this.value === "LUNCH IN" || this.value === "LUNCH OUT"){
 
-        selfieContainer.style.display="none";
-
-        selfieInfo.style.display="block";
-
+        selfieContainer.style.display = "none";
+        selfieInfo.style.display = "block";
         removeSelfie();
 
-    }
+    }else{
 
-    else{
-
-        selfieContainer.style.display="block";
-
-        selfieInfo.style.display="none";
+        selfieContainer.style.display = "block";
+        selfieInfo.style.display = "none";
 
     }
 
@@ -551,37 +648,101 @@ document.getElementById("attendance").addEventListener("change",function(){
 function loadSelfie(event){
 
     const file = event.target.files[0];
+    const status = document.getElementById("status");
 
     if(!file){
         return;
     }
 
-    imageData = "";
+    if(!file.type.startsWith("image/")){
+
+        status.style.color = "#E53935";
+        status.innerHTML = "❌ Please select a valid image.";
+        event.target.value = "";
+        return;
+
+    }
+
+    status.style.color = "#444";
+    status.innerHTML = "⏳ Preparing and compressing selfie...";
 
     const reader = new FileReader();
 
     reader.onload = function(e){
 
-        imageData = e.target.result;
+        const image = new Image();
 
-        document.getElementById("fileName").innerHTML =
-        "✅ Selfie Ready";
+        image.onload = function(){
 
-        document.getElementById("selfieLabel").innerHTML =
-        "📷 CHANGE SELFIE";
+            const maxSize = 800;
 
-        document.getElementById("removeSelfie").style.display =
-        "inline-block";
+            let width = image.width;
+            let height = image.height;
 
-        document.getElementById("status").style.color =
-        "#28A745";
+            if(width > height && width > maxSize){
 
-        document.getElementById("status").innerHTML =
-        "✅ Selfie verified.";
+                height = Math.round(height * maxSize / width);
+                width = maxSize;
 
-        setTimeout(function(){
-            document.getElementById("status").innerHTML="";
-        },2500);
+            }else if(height > maxSize){
+
+                width = Math.round(width * maxSize / height);
+                height = maxSize;
+
+            }
+
+            const canvas = document.createElement("canvas");
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const context = canvas.getContext("2d");
+
+            context.drawImage(image, 0, 0, width, height);
+
+            imageData = canvas.toDataURL("image/jpeg", 0.75);
+
+            document.getElementById("selfiePreview").src = imageData;
+
+            document.getElementById(
+                "selfiePreviewContainer"
+            ).style.display = "block";
+
+            document.getElementById("fileName").innerHTML =
+                "✅ Compressed selfie ready";
+
+            document.getElementById("selfieLabel").innerHTML =
+                "📷 CHANGE SELFIE";
+
+            document.getElementById("removeSelfie").style.display =
+                "inline-block";
+
+            status.style.color = "#28A745";
+            status.innerHTML = "✅ Selfie ready to submit.";
+
+            setTimeout(function(){
+                status.innerHTML = "";
+            }, 2500);
+
+        };
+
+        image.onerror = function(){
+
+            status.style.color = "#E53935";
+            status.innerHTML = "❌ Unable to read the selected image.";
+            event.target.value = "";
+
+        };
+
+        image.src = e.target.result;
+
+    };
+
+    reader.onerror = function(){
+
+        status.style.color = "#E53935";
+        status.innerHTML = "❌ Unable to load the selfie.";
+        event.target.value = "";
 
     };
 
@@ -596,149 +757,177 @@ function removeSelfie(){
     document.getElementById("selfie").value = "";
 
     document.getElementById("fileName").innerHTML =
-    "No selfie selected";
+        "No selfie selected";
 
     document.getElementById("selfieLabel").innerHTML =
-    "📸 SELECT SELFIE";
+        "📸 SELECT SELFIE";
 
     document.getElementById("removeSelfie").style.display =
-    "none";
+        "none";
+
+    document.getElementById("selfiePreview").removeAttribute("src");
+
+    document.getElementById(
+        "selfiePreviewContainer"
+    ).style.display = "none";
 
     document.getElementById("status").innerHTML = "";
 
 }
 
+function setLoading(isLoading, message){
+
+    const overlay =
+        document.getElementById("loadingOverlay");
+
+    const loadingText =
+        document.getElementById("loadingText");
+
+    const submitBtn =
+        document.getElementById("submitBtn");
+
+    const nameSelect =
+        document.getElementById("name");
+
+    const attendanceSelect =
+        document.getElementById("attendance");
+
+    const selfieInput =
+        document.getElementById("selfie");
+
+    isSubmitting = isLoading;
+
+    if(message){
+        loadingText.innerHTML = message;
+    }
+
+    overlay.style.display =
+        isLoading ? "flex" : "none";
+
+    submitBtn.disabled = isLoading;
+    nameSelect.disabled = isLoading;
+    attendanceSelect.disabled = isLoading;
+    selfieInput.disabled = isLoading;
+
+    submitBtn.innerHTML =
+        isLoading
+            ? "⏳ PROCESSING..."
+            : "SUBMIT ATTENDANCE";
+
+}
+
+function showStatus(message, color, duration){
+
+    const status =
+        document.getElementById("status");
+
+    status.style.color = color;
+    status.innerHTML = message;
+
+    if(duration){
+
+        setTimeout(function(){
+            status.innerHTML = "";
+        }, duration);
+
+    }
+
+}
 
 function submitData(){
 
-    var name =
-    document.getElementById("name").value;
-
-    var attendance =
-    document.getElementById("attendance").value;
-
-    var status =
-    document.getElementById("status");
-
-    var submitBtn =
-    document.getElementById("submitBtn");
-
-
-    if(name == ""){
-
-        status.style.color = "red";
-        status.innerHTML =
-        "❌ Please select your name.";
-
-        setTimeout(function(){
-            status.innerHTML = "";
-        },4000);
-
+    if(isSubmitting){
         return;
     }
 
+    const name =
+        document.getElementById("name").value;
 
-    if(attendance == ""){
+    const attendance =
+        document.getElementById("attendance").value;
 
-        status.style.color = "red";
-        status.innerHTML =
-        "❌ Please select attendance type.";
+    if(name === ""){
 
-        setTimeout(function(){
-            status.innerHTML = "";
-        },4000);
+        showStatus(
+            "❌ Please select your name.",
+            "#E53935",
+            4000
+        );
 
         return;
+
     }
 
+    if(attendance === ""){
+
+        showStatus(
+            "❌ Please select attendance type.",
+            "#E53935",
+            4000
+        );
+
+        return;
+
+    }
 
     if(
-        attendance == "TIME IN" ||
-        attendance == "TIME OUT"
+        (attendance === "TIME IN" ||
+         attendance === "TIME OUT") &&
+        imageData === ""
     ){
 
-        if(imageData == ""){
+        showStatus(
+            "❌ Please take your selfie first.",
+            "#E53935",
+            4000
+        );
 
-            status.style.color = "red";
-            status.innerHTML =
-            "❌ Please take your selfie first.";
+        return;
 
-            setTimeout(function(){
-                status.innerHTML = "";
-            },4000);
-
-            return;
-        }
     }
-
 
     if(!navigator.geolocation){
 
-        status.style.color = "red";
-        status.innerHTML =
-        "❌ GPS is not supported by your browser.";
-
-        setTimeout(function(){
-            status.innerHTML = "";
-        },4000);
+        showStatus(
+            "❌ GPS is not supported by your browser.",
+            "#E53935",
+            4000
+        );
 
         return;
+
     }
 
-
-    submitBtn.disabled = true;
-    submitBtn.innerHTML =
-    "⏳ PROCESSING...";
-
-    status.style.color = "#444";
-    status.innerHTML =
-    "📍 Getting GPS location...";
-
+    setLoading(
+        true,
+        "📍 Getting GPS location..."
+    );
 
     navigator.geolocation.getCurrentPosition(
 
         function(position){
 
-            var latitude =
-            position.coords.latitude;
+            const latitude =
+                position.coords.latitude;
 
-            var longitude =
-            position.coords.longitude;
+            const longitude =
+                position.coords.longitude;
 
-            status.innerHTML =
-            "💾 Saving attendance...";
+            document.getElementById(
+                "loadingText"
+            ).innerHTML =
+                "💾 Saving attendance...";
 
+            const formData =
+                new URLSearchParams();
 
-            var formData =
-            new URLSearchParams();
+            formData.append("name", name);
+            formData.append("attendance", attendance);
+            formData.append("imageData", imageData);
+            formData.append("latitude", latitude);
+            formData.append("longitude", longitude);
 
-            formData.append(
-                "name",
-                name
-            );
-
-            formData.append(
-                "attendance",
-                attendance
-            );
-
-            formData.append(
-                "imageData",
-                imageData
-            );
-
-            formData.append(
-                "latitude",
-                latitude
-            );
-
-            formData.append(
-                "longitude",
-                longitude
-            );
-
-
-            fetch(SCRIPT_URL,{
+            fetch(SCRIPT_URL, {
                 method:"POST",
                 body:formData,
                 redirect:"follow"
@@ -752,72 +941,72 @@ function submitData(){
                         "Server error " +
                         response.status
                     );
+
                 }
 
                 return response.text();
+
             })
 
             .then(function(response){
 
-                if(
-                    response.indexOf("❌") > -1
-                ){
+                setLoading(false);
 
-                    status.style.color =
-                    "#E53935";
+                if(response.indexOf("❌") > -1){
 
-                    status.innerHTML =
-                    response;
-
-                    submitBtn.disabled =
-                    false;
-
-                    submitBtn.innerHTML =
-                    "SUBMIT ATTENDANCE";
+                    showStatus(
+                        response,
+                        "#E53935",
+                        6000
+                    );
 
                     return;
+
                 }
 
+                switch(attendance){
 
-                if(attendance == "TIME IN"){
+                    case "TIME IN":
 
-                    status.style.color =
-                    "#28A745";
+                        showStatus(
+                            "🟢 Time In recorded successfully.",
+                            "#28A745",
+                            4000
+                        );
 
-                    status.innerHTML =
-                    "🟢 Time In recorded successfully.";
+                        break;
+
+                    case "TIME OUT":
+
+                        showStatus(
+                            "🔵 Time Out recorded successfully.",
+                            "#1976D2",
+                            4000
+                        );
+
+                        break;
+
+                    case "LUNCH OUT":
+
+                        showStatus(
+                            "🍽️ Lunch Out recorded successfully. Enjoy your meal!",
+                            "#FF9800",
+                            4000
+                        );
+
+                        break;
+
+                    case "LUNCH IN":
+
+                        showStatus(
+                            "🍴 Lunch In recorded successfully. Welcome back!",
+                            "#4CAF50",
+                            4000
+                        );
+
+                        break;
+
                 }
-
-
-                if(attendance == "TIME OUT"){
-
-                    status.style.color =
-                    "#1976D2";
-
-                    status.innerHTML =
-                    "🔵 Time Out recorded successfully.";
-                }
-
-
-                if(attendance == "LUNCH OUT"){
-
-                    status.style.color =
-                    "#FF9800";
-
-                    status.innerHTML =
-                    "🍽️ Lunch Out recorded successfully. Enjoy your meal!";
-                }
-
-
-                if(attendance == "LUNCH IN"){
-
-                    status.style.color =
-                    "#4CAF50";
-
-                    status.innerHTML =
-                    "🍴 Lunch In recorded successfully. Welcome back!";
-                }
-
 
                 document.getElementById(
                     "name"
@@ -827,84 +1016,54 @@ function submitData(){
                     "attendance"
                 ).selectedIndex = 0;
 
-
                 removeSelfie();
-
 
                 document.getElementById(
                     "selfieContainer"
-                ).style.display =
-                "block";
+                ).style.display = "block";
 
                 document.getElementById(
                     "selfieInfo"
-                ).style.display =
-                "none";
-
-
-                submitBtn.disabled =
-                false;
-
-                submitBtn.innerHTML =
-                "SUBMIT ATTENDANCE";
-
-
-                setTimeout(function(){
-
-                    status.innerHTML = "";
-
-                },4000);
+                ).style.display = "none";
 
             })
 
             .catch(function(error){
 
-                status.style.color =
-                "#E53935";
+                setLoading(false);
 
-                status.innerHTML =
-                "❌ Unable to connect to attendance server. " +
-                error.message;
-
-                submitBtn.disabled =
-                false;
-
-                submitBtn.innerHTML =
-                "SUBMIT ATTENDANCE";
-
-                setTimeout(function(){
-
-                    status.innerHTML = "";
-
-                },6000);
+                showStatus(
+                    "❌ Unable to connect to attendance server. " +
+                    error.message,
+                    "#E53935",
+                    6000
+                );
 
             });
 
         },
 
+        function(error){
 
-        function(){
+            setLoading(false);
 
-            status.style.color =
-            "#E53935";
+            let message =
+                "❌ Please allow GPS location.";
 
-            status.innerHTML =
-            "❌ Please allow GPS location.";
+            if(error && error.code === 3){
 
-            submitBtn.disabled =
-            false;
+                message =
+                    "❌ GPS request timed out. Turn on location and try again.";
 
-            submitBtn.innerHTML =
-            "SUBMIT ATTENDANCE";
+            }
 
-            setTimeout(function(){
-
-                status.innerHTML = "";
-
-            },4000);
+            showStatus(
+                message,
+                "#E53935",
+                5000
+            );
 
         },
-
 
         {
             enableHighAccuracy:true,
@@ -916,13 +1075,12 @@ function submitData(){
 
 }
 
-
 function updateClock(){
 
     const now = new Date();
 
     document.getElementById("currentDate").innerHTML =
-        now.toLocaleDateString("en-US",{
+        now.toLocaleDateString("en-US", {
             month:"long",
             day:"numeric",
             year:"numeric"
@@ -933,7 +1091,7 @@ function updateClock(){
 
 }
 
-setInterval(updateClock,1000);
+setInterval(updateClock, 1000);
 updateClock();
 
 </script>
