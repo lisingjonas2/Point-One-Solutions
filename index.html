@@ -435,6 +435,62 @@ img{
     margin-top:12px;
 }
 
+
+/* =======================
+   EMPLOYEE STATUS CARD
+======================= */
+
+#employeeStatusCard{
+    display:none;
+    margin:12px 0 14px;
+    padding:14px;
+    border:2px solid #D4AF37;
+    border-radius:14px;
+    background:#FFFDF5;
+    text-align:left;
+}
+
+#employeeStatusTitle{
+    margin:0 0 8px;
+    color:#203864;
+    font-size:16px;
+    font-weight:bold;
+    text-align:center;
+}
+
+.status-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:6px 0;
+    border-bottom:1px solid #EEE;
+    color:#444;
+    font-size:14px;
+}
+
+.status-row:last-child{
+    border-bottom:none;
+}
+
+.status-row strong{
+    color:#203864;
+}
+
+#statusLoading{
+    display:none;
+    margin:10px 0;
+    color:#666;
+    font-size:14px;
+    font-weight:bold;
+    text-align:center;
+}
+
+#attendance:disabled{
+    background:#F2F2F2;
+    color:#777;
+    cursor:not-allowed;
+}
+
 </style>
 
 </head>
@@ -491,19 +547,37 @@ img{
 
 </select>
 
+<div id="statusLoading">
+    ⏳ Checking today's attendance...
+</div>
 
+<div id="employeeStatusCard">
+    <div id="employeeStatusTitle">Today's Attendance</div>
 
-<select id="attendance">
+    <div class="status-row">
+        <span>🟢 TIME IN</span>
+        <strong id="timeInStatus">Not yet</strong>
+    </div>
 
-<option value="">SELECT ATTENDANCE</option>
+    <div class="status-row">
+        <span>🍽️ LUNCH OUT</span>
+        <strong id="lunchOutStatus">Not yet</strong>
+    </div>
 
-<option value="TIME IN">🟢 TIME IN</option>
+    <div class="status-row">
+        <span>🍴 LUNCH IN</span>
+        <strong id="lunchInStatus">Not yet</strong>
+    </div>
 
-<option value="LUNCH OUT">🍽️ LUNCH OUT</option>
+    <div class="status-row">
+        <span>🔴 TIME OUT</span>
+        <strong id="timeOutStatus">Not yet</strong>
+    </div>
+</div>
 
-<option value="LUNCH IN">🍴 LUNCH IN</option>
+<select id="attendance" disabled>
 
-<option value="TIME OUT">🔴 TIME OUT</option>
+<option value="">SELECT EMPLOYEE FIRST</option>
 
 </select>
 
@@ -570,6 +644,249 @@ let cachedPositionTime = 0;
 
 const SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbxevqBXcetSpjy8YgJOh4RC20-myu3lgipaSOVZBYFt0naSYbliRkfdp37Jt7McR5ffaw/exec";
+
+let currentEmployeeStatus = null;
+
+document.getElementById("name").addEventListener(
+    "change",
+    function(){
+
+        const name = this.value;
+
+        resetAttendanceUI();
+
+        if(!name){
+            return;
+        }
+
+        checkEmployeeStatus(name);
+    }
+);
+
+function resetAttendanceUI(){
+
+    currentEmployeeStatus = null;
+
+    const attendanceSelect =
+        document.getElementById("attendance");
+
+    attendanceSelect.innerHTML =
+        '<option value="">SELECT EMPLOYEE FIRST</option>';
+
+    attendanceSelect.disabled = true;
+
+    document.getElementById(
+        "employeeStatusCard"
+    ).style.display = "none";
+
+    document.getElementById(
+        "statusLoading"
+    ).style.display = "none";
+
+    document.getElementById(
+        "selfieContainer"
+    ).style.display = "block";
+
+    document.getElementById(
+        "selfieInfo"
+    ).style.display = "none";
+
+    removeSelfie();
+}
+
+function checkEmployeeStatus(name){
+
+    const statusLoading =
+        document.getElementById("statusLoading");
+
+    const attendanceSelect =
+        document.getElementById("attendance");
+
+    statusLoading.style.display = "block";
+
+    attendanceSelect.disabled = true;
+
+    const formData =
+        new URLSearchParams();
+
+    formData.append("action", "getStatus");
+    formData.append("action", "saveAttendance");
+            formData.append("name", name);
+
+    fetch(SCRIPT_URL, {
+        method:"POST",
+        body:formData,
+        redirect:"follow"
+    })
+    .then(function(response){
+
+        if(!response.ok){
+            throw new Error(
+                "Server error " + response.status
+            );
+        }
+
+        return response.text();
+    })
+    .then(function(text){
+
+        let data;
+
+        try{
+            data = JSON.parse(text);
+        }catch(error){
+            throw new Error(
+                "Invalid status response."
+            );
+        }
+
+        statusLoading.style.display = "none";
+
+        if(!data.success){
+
+            showStatus(
+                "❌ " + (
+                    data.message ||
+                    "Unable to check attendance status."
+                ),
+                "#E53935",
+                5000
+            );
+
+            return;
+        }
+
+        currentEmployeeStatus = data;
+
+        updateStatusCard(data);
+        updateAttendanceOptions(data);
+
+    })
+    .catch(function(error){
+
+        statusLoading.style.display = "none";
+
+        showStatus(
+            "❌ Unable to check employee status. " +
+            error.message,
+            "#E53935",
+            6000
+        );
+    });
+}
+
+function updateStatusCard(data){
+
+    const card =
+        document.getElementById(
+            "employeeStatusCard"
+        );
+
+    document.getElementById(
+        "employeeStatusTitle"
+    ).innerHTML =
+        data.completed
+            ? "✅ Attendance Completed Today"
+            : "Today's Attendance";
+
+    document.getElementById(
+        "timeInStatus"
+    ).innerHTML =
+        data.timeIn
+            ? "✅ " + data.timeInTime
+            : "Not yet";
+
+    document.getElementById(
+        "lunchOutStatus"
+    ).innerHTML =
+        data.lunchOut
+            ? "✅ " + data.lunchOutTime
+            : "Not yet";
+
+    document.getElementById(
+        "lunchInStatus"
+    ).innerHTML =
+        data.lunchIn
+            ? "✅ " + data.lunchInTime
+            : "Not yet";
+
+    document.getElementById(
+        "timeOutStatus"
+    ).innerHTML =
+        data.timeOut
+            ? "✅ " + data.timeOutTime
+            : "Not yet";
+
+    card.style.display = "block";
+}
+
+function updateAttendanceOptions(data){
+
+    const attendanceSelect =
+        document.getElementById("attendance");
+
+    attendanceSelect.innerHTML = "";
+
+    if(data.completed){
+
+        attendanceSelect.innerHTML =
+            '<option value="">ATTENDANCE COMPLETED</option>';
+
+        attendanceSelect.disabled = true;
+
+        document.getElementById(
+            "selfieContainer"
+        ).style.display = "none";
+
+        document.getElementById(
+            "selfieInfo"
+        ).style.display = "none";
+
+        showStatus(
+            "✅ Your attendance is already completed today.",
+            "#28A745",
+            5000
+        );
+
+        return;
+    }
+
+    const placeholder =
+        document.createElement("option");
+
+    placeholder.value = "";
+    placeholder.textContent =
+        "SELECT ATTENDANCE";
+
+    attendanceSelect.appendChild(
+        placeholder
+    );
+
+    const labels = {
+        "TIME IN":"🟢 TIME IN",
+        "LUNCH OUT":"🍽️ LUNCH OUT",
+        "LUNCH IN":"🍴 LUNCH IN",
+        "TIME OUT":"🔴 TIME OUT"
+    };
+
+    data.nextActions.forEach(
+        function(action){
+
+            const option =
+                document.createElement("option");
+
+            option.value = action;
+            option.textContent =
+                labels[action] || action;
+
+            attendanceSelect.appendChild(
+                option
+            );
+        }
+    );
+
+    attendanceSelect.disabled = false;
+}
 
 document.getElementById("attendance").addEventListener("change", function(){
 
@@ -1044,20 +1361,15 @@ function submitData(){
 
                 setTimeout(function(){
 
-                    document.getElementById("name").selectedIndex = 0;
-                    document.getElementById("attendance").selectedIndex = 0;
-
                     removeSelfie();
 
                     document.getElementById(
-                        "selfieContainer"
-                    ).style.display = "block";
+                        "attendance"
+                    ).selectedIndex = 0;
 
-                    document.getElementById(
-                        "selfieInfo"
-                    ).style.display = "none";
+                    checkEmployeeStatus(name);
 
-                }, 2500);
+                }, 1800);
 
             })
 
