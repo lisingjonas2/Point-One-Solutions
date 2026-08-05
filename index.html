@@ -44,18 +44,18 @@ body{
 }
 
 .logo{
-    width:145px;
+    width:155px;
     max-width:100%;
     height:auto;
     display:block;
-    margin:0 auto 14px;
+    margin:0 auto 4px;
 }
 
 .gold-line{
-    width:90px;
+    width:135px;
     height:4px;
     background:#D4AF37;
-    margin:15px auto 25px;
+    margin:12px auto 22px;
     border-radius:50px;
 }
 
@@ -167,9 +167,10 @@ color:#333;
 
 .header{
     display:flex;
-    justify-content:space-between;
+    flex-direction:column;
     align-items:center;
-    gap:15px;
+    text-align:center;
+    gap:2px;
 }
 
 .header-info{
@@ -263,14 +264,21 @@ img{
 }
 
 .header-info{
-    flex:1;
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:4px 12px;
+    align-items:center;
+    justify-items:center;
+    margin-top:2px;
 }
 
 .header-item{
     display:flex;
     align-items:center;
-    gap:10px;
-    margin:10px 0;
+    justify-content:center;
+    gap:6px;
+    margin:2px 0;
 }
 
 .header-item span{
