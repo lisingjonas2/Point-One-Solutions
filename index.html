@@ -421,6 +421,20 @@ img{
     }
 }
 
+
+/* Stable action-button layout */
+#removeSelfie,
+#submitBtn{
+    position:static;
+    float:none;
+    clear:both;
+    width:100%;
+}
+
+#removeSelfie{
+    margin-top:12px;
+}
+
 </style>
 
 </head>
@@ -551,6 +565,8 @@ SUBMIT ATTENDANCE
 
 let imageData = "";
 let isSubmitting = false;
+let cachedPosition = null;
+let cachedPositionTime = 0;
 
 const SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbxevqBXcetSpjy8YgJOh4RC20-myu3lgipaSOVZBYFt0naSYbliRkfdp37Jt7McR5ffaw/exec";
@@ -595,99 +611,153 @@ function loadSelfie(event){
         status.innerHTML = "❌ Please select a valid image.";
         event.target.value = "";
         return;
-
     }
 
     status.style.color = "#444";
-    status.innerHTML = "⏳ Preparing and compressing selfie...";
+    status.innerHTML = "⏳ Preparing selfie...";
 
-    const reader = new FileReader();
+    /*
+     * Smaller image = faster upload to Apps Script and Google Drive.
+     * Natural orientation is preserved; no mirror/flip is applied.
+     */
+    const maxSize = 420;
+    const jpegQuality = 0.50;
 
-    reader.onload = function(e){
+    function processImage(image){
 
-        const image = new Image();
+        let width = image.width;
+        let height = image.height;
 
-        image.onload = function(){
+        if(width > height && width > maxSize){
 
-            const maxSize = 500;
+            height = Math.round(height * maxSize / width);
+            width = maxSize;
 
-            let width = image.width;
-            let height = image.height;
+        }else if(height > maxSize){
 
-            if(width > height && width > maxSize){
+            width = Math.round(width * maxSize / height);
+            height = maxSize;
+        }
 
-                height = Math.round(height * maxSize / width);
-                width = maxSize;
+        const canvas = document.createElement("canvas");
 
-            }else if(height > maxSize){
+        canvas.width = width;
+        canvas.height = height;
 
-                width = Math.round(width * maxSize / height);
-                height = maxSize;
+        const context = canvas.getContext("2d", {
+            alpha:false
+        });
 
+        /*
+         * White background prevents black areas when converting
+         * transparent images to JPEG.
+         */
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(0, 0, width, height);
+
+        /*
+         * Natural camera output—no horizontal flip.
+         */
+        context.drawImage(image, 0, 0, width, height);
+
+        imageData = canvas.toDataURL(
+            "image/jpeg",
+            jpegQuality
+        );
+
+        document.getElementById("selfiePreview").src =
+            imageData;
+
+        document.getElementById(
+            "selfiePreviewContainer"
+        ).style.display = "block";
+
+        document.getElementById("fileName").innerHTML =
+            "✅ Selfie ready";
+
+        document.getElementById("selfieLabel").innerHTML =
+            "📷 CHANGE SELFIE";
+
+        document.getElementById(
+            "removeSelfie"
+        ).style.display = "block";
+
+        status.style.color = "#28A745";
+        status.innerHTML =
+            "✅ Selfie ready to submit.";
+
+        setTimeout(function(){
+
+            if(
+                status.innerHTML ===
+                "✅ Selfie ready to submit."
+            ){
+                status.innerHTML = "";
             }
 
-            const canvas = document.createElement("canvas");
+        }, 1800);
+    }
 
-            canvas.width = width;
-            canvas.height = height;
+    /*
+     * createImageBitmap is usually faster and handles phone image
+     * orientation correctly. FileReader is the fallback.
+     */
+    if("createImageBitmap" in window){
 
-const canvas = document.createElement("canvas");
+        createImageBitmap(file, {
+            imageOrientation:"from-image"
+        })
+        .then(function(bitmap){
 
-canvas.width = width;
-canvas.height = height;
+            processImage(bitmap);
+            bitmap.close();
 
-const context = canvas.getContext("2d");
+        })
+        .catch(function(){
 
-context.drawImage(image, 0, 0, width, height);
+            loadWithFileReader(file);
+        });
 
-imageData = canvas.toDataURL("image/jpeg", 0.75);
-            
-            document.getElementById("selfiePreview").src = imageData;
+    }else{
 
-            document.getElementById(
-                "selfiePreviewContainer"
-            ).style.display = "block";
+        loadWithFileReader(file);
+    }
 
-            document.getElementById("fileName").innerHTML =
-                "✅ Compressed selfie ready";
+    function loadWithFileReader(selectedFile){
 
-            document.getElementById("selfieLabel").innerHTML =
-                "📷 CHANGE SELFIE";
+        const reader = new FileReader();
 
-            document.getElementById("removeSelfie").style.display =
-                "inline-block";
+        reader.onload = function(e){
 
-            status.style.color = "#28A745";
-            status.innerHTML = "✅ Selfie ready to submit.";
+            const image = new Image();
 
-            setTimeout(function(){
-                status.innerHTML = "";
-            }, 2500);
+            image.onload = function(){
+                processImage(image);
+            };
 
+            image.onerror = function(){
+
+                status.style.color = "#E53935";
+                status.innerHTML =
+                    "❌ Unable to read the selected image.";
+
+                event.target.value = "";
+            };
+
+            image.src = e.target.result;
         };
 
-        image.onerror = function(){
+        reader.onerror = function(){
 
             status.style.color = "#E53935";
-            status.innerHTML = "❌ Unable to read the selected image.";
-            event.target.value = "";
+            status.innerHTML =
+                "❌ Unable to load the selfie.";
 
+            event.target.value = "";
         };
 
-        image.src = e.target.result;
-
-    };
-
-    reader.onerror = function(){
-
-        status.style.color = "#E53935";
-        status.innerHTML = "❌ Unable to load the selfie.";
-        event.target.value = "";
-
-    };
-
-    reader.readAsDataURL(file);
-
+        reader.readAsDataURL(selectedFile);
+    }
 }
 
 function removeSelfie(){
@@ -772,6 +842,42 @@ function showStatus(message, color, duration){
 
 }
 
+function getFastLocation(onSuccess, onError){
+
+    const now = Date.now();
+
+    /*
+     * Reuse a recent location for up to 30 seconds.
+     * This avoids waiting for GPS again when the employee retries.
+     */
+    if(
+        cachedPosition &&
+        (now - cachedPositionTime) <= 30000
+    ){
+        onSuccess(cachedPosition);
+        return;
+    }
+
+    getFastLocation(
+
+        function(position){
+
+            cachedPosition = position;
+            cachedPositionTime = Date.now();
+
+            onSuccess(position);
+        },
+
+        onError,
+
+        {
+            enableHighAccuracy:true,
+            timeout:8000,
+            maximumAge:30000
+        }
+    );
+}
+
 function submitData(){
 
     if(isSubmitting){
@@ -854,7 +960,7 @@ function submitData(){
             document.getElementById(
                 "loadingText"
             ).innerHTML =
-                "💾 Saving attendance...";
+                "📤 Uploading selfie and saving attendance...";
 
             const formData =
                 new URLSearchParams();
@@ -990,12 +1096,6 @@ function submitData(){
                 5000
             );
 
-        },
-
-        {
-    enableHighAccuracy:true,
-    timeout:10000,
-    maximumAge:30000
         }
 
     );
