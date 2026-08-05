@@ -1085,7 +1085,7 @@ function removeSelfie(){
 
 }
 
-function setLoading(isLoading, message){
+function setLoading(isLoading, message, showOverlay){
 
     const overlay =
         document.getElementById("loadingOverlay");
@@ -1107,12 +1107,22 @@ function setLoading(isLoading, message){
 
     isSubmitting = isLoading;
 
+    if(typeof showOverlay === "undefined"){
+        showOverlay = true;
+    }
+
     if(message){
         loadingText.innerHTML = message;
     }
 
+    /*
+     * Show the full popup only for TIME IN and TIME OUT.
+     * Lunch actions still disable the form, but no popup appears.
+     */
     overlay.style.display =
-        isLoading ? "flex" : "none";
+        (isLoading && showOverlay)
+            ? "flex"
+            : "none";
 
     submitBtn.disabled = isLoading;
     nameSelect.disabled = isLoading;
@@ -1123,7 +1133,6 @@ function setLoading(isLoading, message){
         isLoading
             ? "⏳ PROCESSING..."
             : "SUBMIT ATTENDANCE";
-
 }
 
 function showStatus(message, color, duration){
@@ -1244,10 +1253,31 @@ function submitData(){
 
     }
 
-    setLoading(
-        true,
-        "📍 Getting GPS location..."
-    );
+    const requiresSelfie =
+        attendance === "TIME IN" ||
+        attendance === "TIME OUT";
+
+    if(requiresSelfie){
+
+        setLoading(
+            true,
+            "📍 Getting GPS location...",
+            true
+        );
+
+    }else{
+
+        setLoading(
+            true,
+            "",
+            false
+        );
+
+        showStatus(
+            "💾 Saving attendance...",
+            "#444"
+        );
+    }
 
     navigator.geolocation.getCurrentPosition(
 
@@ -1259,10 +1289,20 @@ function submitData(){
             const longitude =
                 position.coords.longitude;
 
-            document.getElementById(
-                "loadingText"
-            ).innerHTML =
-                "📤 Uploading selfie and saving attendance...";
+            if(requiresSelfie){
+
+                document.getElementById(
+                    "loadingText"
+                ).innerHTML =
+                    "📤 Uploading selfie and saving attendance...";
+
+            }else{
+
+                showStatus(
+                    "💾 Saving attendance...",
+                    "#444"
+                );
+            }
 
             const formData =
                 new URLSearchParams();
