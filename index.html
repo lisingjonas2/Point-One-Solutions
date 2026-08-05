@@ -205,6 +205,33 @@ color:#333;
     font-weight:bold;
 }
 
+.header-date-time{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
+    margin:8px 0 14px;
+    font-size:18px;
+    font-weight:bold;
+    color:#222;
+}
+
+.header-date-time span{
+    font-size:24px;
+}
+
+.header-date-time .divider{
+    color:#D4AF37;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.gold-line{
+    width:135px;
+    height:4px;
+    ...
+}    
+
 .selfie-btn{
     display:inline-block;
     background:#D4AF37;
@@ -504,23 +531,15 @@ h1{
     src="https://drive.google.com/thumbnail?id=1iQn1PInZWlfYefopYGdu9XWKa020LKdx&sz=w600"
     alt="Point One Solutions Logo">
 
-    <div class="header-info">
+<div class="header-date-time">
 
-        <div class="header-item">
-            <span>📅</span>
-            <div>
-                <small>DATE</small>
-                <strong id="currentDate"></strong>
-            </div>
-        </div>
+    <span>📅</span>
+    <strong id="currentDate"></strong>
 
-        <div class="header-item">
-            <span>🕒</span>
-            <div>
-                <small>TIME</small>
-                <strong id="currentTime"></strong>
+    <span class="divider">|</span>
 
-    </div>
+    <span>🕒</span>
+    <strong id="currentTime"></strong>
 
 </div>
 
