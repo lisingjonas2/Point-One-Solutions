@@ -631,11 +631,20 @@ function loadSelfie(event){
             canvas.width = width;
             canvas.height = height;
 
-            const context = canvas.getContext("2d");
+const canvas = document.createElement("canvas");
 
-            context.drawImage(image, 0, 0, width, height);
+canvas.width = width;
+canvas.height = height;
 
-            imageData = canvas.toDataURL("image/jpeg", 0.55);
+const context = canvas.getContext("2d");
+
+context.save();
+context.translate(width, 0);
+context.scale(-1, 1);
+context.drawImage(image, 0, 0, width, height);
+context.restore();
+
+imageData = canvas.toDataURL("image/jpeg", 0.75);
             
             document.getElementById("selfiePreview").src = imageData;
 
