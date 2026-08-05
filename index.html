@@ -1,47 +1,937 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Point One Solutions Attendance</title>
 
-    <style>
-        body{
-            margin:0;
-            background:#000;
-            color:#FFD700;
-            font-family:Arial, sans-serif;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-        }
+<meta name="viewport"
+content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-        .card{
-            width:400px;
-            background:#111;
-            border:2px solid gold;
-            border-radius:15px;
-            padding:30px;
-            text-align:center;
-        }
+<style>
 
-        h1{
-            color:gold;
-        }
+html{
+    width:100%;
+    height:100%;
+}
 
-        p{
-            color:white;
-        }
-    </style>
+body{
+    margin:0;
+    padding:8px;
+    width:100%;
+    min-height:100vh;
+
+    background:linear-gradient(135deg,#0D0D0D,#1F1F1F);
+
+    font-family:Arial,sans-serif;
+    overflow-x:hidden;
+}
+
+.card{
+    width:100%;
+    max-width:520px;
+    background:#fff;
+
+    margin:8px auto;
+
+    padding:20px;
+
+    border-radius:25px;
+    border:3px solid #D4AF37;
+
+    box-sizing:border-box;
+}
+
+.logo{
+    width:180px;
+    max-width:100%;
+    height:auto;
+}
+
+.gold-line{
+    width:90px;
+    height:4px;
+    background:#D4AF37;
+    margin:15px auto 25px;
+    border-radius:50px;
+}
+
+
+h1{
+
+font-size:30px;
+font-weight:bold;
+color:#203864;
+letter-spacing:2px;
+margin-top:20px;
+margin-bottom:25px;
+text-align:center;
+
+}
+
+input,
+select,
+button{
+    width:100%;
+    padding:15px;
+    margin:10px 0;
+    font-size:16px;
+    border-radius:12px;
+    box-sizing:border-box;
+}
+
+select{
+    width:100%;
+    height:58px;
+    border:2px solid #DDD;
+    border-radius:12px;
+    padding:0 15px;
+    background:#FFF;
+    font-size:16px;
+    appearance:none;
+}
+
+select:hover{
+    border-color:#D4AF37;
+}
+
+select:focus{
+    border-color:#D4AF37;
+    box-shadow:0 0 8px rgba(212,175,55,.4);
+    outline:none;
+}
+
+input:focus,
+select:focus{
+
+border-color:#B8860B;
+
+}
+
+button{
+    width:100%;
+    padding:16px;
+    margin-top:15px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(90deg,#C99700,#F4C430);
+    color:#FFF;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 30px rgba(212,175,55,.45);
+}
+
+button:disabled{
+    background:#999;
+    box-shadow:none;
+    transform:none;
+    cursor:not-allowed;
+}
+
+#selfie{
+
+background:white;
+color:#333;
+
+}
+
+#status{
+    margin-top:20px;
+    font-weight:bold;
+    font-size:15px;
+    color:#006400;
+    min-height:24px;
+}
+
+#selfieInfo{
+    display:none;
+    background:#FFF8E1;
+    border:1px solid #F0C36D;
+    color:#8A6D3B;
+    padding:12px;
+    border-radius:10px;
+    margin-top:10px;
+    font-size:14px;
+    font-weight:bold;
+    text-align:center;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+}
+
+.header-info{
+    flex:1;
+}
+
+.header-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:14px 0;
+}
+
+.header-item span{
+    font-size:32px;
+    width:45px;
+    text-align:center;
+}
+
+.header-item small{
+    display:block;
+    color:#B8860B;
+    font-size:11px;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+
+.header-item strong{
+    display:block;
+    color:#333;
+    font-size:15px;
+    font-weight:bold;
+}
+
+.selfie-btn{
+    display:inline-block;
+    background:#D4AF37;
+    color:#fff;
+    padding:14px 20px;
+    border-radius:12px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
+    transition:.3s;
+}
+
+.selfie-btn:hover{
+    background:#B8860B;
+}
+
+#fileName{
+    display:block;
+    margin-top:10px;
+    color:#555;
+    font-size:14px;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+img{
+    max-width:100%;
+    height:auto;
+}
+
+/* =======================
+   RESPONSIVE DESIGN
+======================= */
+
+/* Tablet */
+@media screen and (max-width:768px){
+
+.card{
+    width:100%;
+    max-width:500px;
+    padding:20px;
+    margin:10px auto;
+}
+
+.header{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+}
+
+.logo{
+    width:160px;
+}
+
+.header-info{
+    flex:1;
+}
+
+.header-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:10px 0;
+}
+
+.header-item span{
+    width:35px;
+    font-size:26px;
+}
+
+.header-item small{
+    font-size:10px;
+}
+
+.header-item strong{
+    font-size:14px;
+}
+
+.gold-line{
+    margin:18px auto;
+}
+
+h1{
+    font-size:26px;
+}
+
+select,
+button,
+.selfie-btn{
+    font-size:15px;
+}
+
+}
+
+
+@media screen and (max-width:480px){
+
+body{
+    padding:6px;
+}
+
+.card{
+    width:100%;
+    max-width:none;
+    margin:0;
+    padding:16px;
+    border-radius:20px;
+}
+
+.logo{
+    width:150px;
+    display:block;
+    margin:auto;
+}
+
+.header{
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+}
+
+.header-info{
+    width:100%;
+}
+
+.header-item{
+    justify-content:center;
+    gap:10px;
+    margin:10px 0;
+}
+
+.header-item span{
+    width:28px;
+    font-size:22px;
+}
+
+.header-item small{
+    font-size:10px;
+}
+
+.header-item strong{
+    font-size:13px;
+}
+
+h1{
+    font-size:22px;
+}
+
+select,
+button,
+.selfie-btn{
+    width:100%;
+    font-size:15px;
+}
+}
+
+
+/* Very Small Phones */
+@media screen and (max-width:360px){
+
+.logo{
+    width:115px;
+}
+
+.header-item span{
+    font-size:20px;
+}
+
+.header-item strong{
+    font-size:12px;
+}
+
+h1{
+    font-size:18px;
+}
+
+}
+
+
+</style>
+
 </head>
+
+
 <body>
 
 <div class="card">
-    <h1>POINT ONE SOLUTIONS</h1>
-    <p>Attendance System</p>
-    <p>Website Successfully Connected to GitHub Pages</p>
+
+<div class="header">
+
+    <img class="logo"
+    src="https://drive.google.com/thumbnail?id=1iQn1PInZWlfYefopYGdu9XWKa020LKdx&sz=w600"
+    alt="Point One Solutions Logo">
+
+    <div class="header-info">
+
+        <div class="header-item">
+            <span>📅</span>
+            <div>
+                <small>DATE</small>
+                <strong id="currentDate"></strong>
+            </div>
+        </div>
+
+        <div class="header-item">
+            <span>🕒</span>
+            <div>
+                <small>TIME</small>
+                <strong id="currentTime"></strong>
+            </div>
+        </div>
+
+        <div class="header-item">
+            <span>📍</span>
+            <div>
+                <small>LOCATION</small>
+                <strong>Felina Corporate Plaza</strong>
+            </div>
+        </div>
+
+    </div>
+
 </div>
 
-</body>
-</html>
+<div class="gold-line"></div>
+
+<h1>EMPLOYEE ATTENDANCE</h1>
+
+
+
+<select id="name">
+
+<option value="">SELECT EMPLOYEE</option>
+
+<option value="Jonas Lising">Jonas Lising</option>
+
+<option value="Jim Baugan">Jim Baugan</option>
+
+<option value="Joshua Lising">Joshua Lising</option>
+
+</select>
+
+
+
+<select id="attendance">
+
+<option value="">SELECT ATTENDANCE</option>
+
+<option value="TIME IN">🟢 TIME IN</option>
+
+<option value="LUNCH OUT">🍽️ LUNCH OUT</option>
+
+<option value="LUNCH IN">🍴 LUNCH IN</option>
+
+<option value="TIME OUT">🔴 TIME OUT</option>
+
+</select>
+
+
+
+<br>
+
+<div id="selfieContainer">
+
+<input
+id="selfie"
+type="file"
+accept="image/*"
+capture="user"
+onchange="loadSelfie(event)"
+style="display:none;">
+
+<label for="selfie" class="selfie-btn" id="selfieLabel">
+📸 SELECT SELFIE
+</label>
+
+<span id="fileName">No selfie selected</span>
+
+<button
+type="button"
+id="removeSelfie"
+onclick="removeSelfie()"
+style="display:none;background:#E53935;">
+🗑 REMOVE SELFIE
+</button>
+
+</div>
+
+<p id="selfieInfo" style="display:none; color:#666; font-size:14px; margin-top:8px;">
+ℹ️ Selfie is not required for Lunch In and Lunch Out.
+</p>
+
+
+<button id="submitBtn" onclick="submitData()">
+SUBMIT ATTENDANCE
+</button>
+
+
+
+<p id="status"></p>
+
+
+
+</div>
+
+
+<script>
+
+let imageData = "";
+
+const SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbxevqBXcetSpjy8YgJOh4RC20-myu3lgipaSOVZBYFt0naSYbliRkfdp37Jt7McR5ffaw/exec";    
+
+document.getElementById("attendance").addEventListener("change",function(){
+
+    const selfieContainer =
+    document.getElementById("selfieContainer");
+
+    const selfieInfo =
+    document.getElementById("selfieInfo");
+
+    document.getElementById("status").innerHTML="";
+
+    if(this.value=="LUNCH IN" || this.value=="LUNCH OUT"){
+
+        selfieContainer.style.display="none";
+
+        selfieInfo.style.display="block";
+
+        removeSelfie();
+
+    }
+
+    else{
+
+        selfieContainer.style.display="block";
+
+        selfieInfo.style.display="none";
+
+    }
+
+});
+
+function loadSelfie(event){
+
+    const file = event.target.files[0];
+
+    if(!file){
+        return;
+    }
+
+    imageData = "";
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+        imageData = e.target.result;
+
+        document.getElementById("fileName").innerHTML =
+        "✅ Selfie Ready";
+
+        document.getElementById("selfieLabel").innerHTML =
+        "📷 CHANGE SELFIE";
+
+        document.getElementById("removeSelfie").style.display =
+        "inline-block";
+
+        document.getElementById("status").style.color =
+        "#28A745";
+
+        document.getElementById("status").innerHTML =
+        "✅ Selfie verified.";
+
+        setTimeout(function(){
+            document.getElementById("status").innerHTML="";
+        },2500);
+
+    };
+
+    reader.readAsDataURL(file);
+
+}
+
+function removeSelfie(){
+
+    imageData = "";
+
+    document.getElementById("selfie").value = "";
+
+    document.getElementById("fileName").innerHTML =
+    "No selfie selected";
+
+    document.getElementById("selfieLabel").innerHTML =
+    "📸 SELECT SELFIE";
+
+    document.getElementById("removeSelfie").style.display =
+    "none";
+
+    document.getElementById("status").innerHTML = "";
+
+}
+
+
+function submitData(){
+
+    var name =
+    document.getElementById("name").value;
+
+    var attendance =
+    document.getElementById("attendance").value;
+
+    var status =
+    document.getElementById("status");
+
+    var submitBtn =
+    document.getElementById("submitBtn");
+
+
+    if(name == ""){
+
+        status.style.color = "red";
+        status.innerHTML =
+        "❌ Please select your name.";
+
+        setTimeout(function(){
+            status.innerHTML = "";
+        },4000);
+
+        return;
+    }
+
+
+    if(attendance == ""){
+
+        status.style.color = "red";
+        status.innerHTML =
+        "❌ Please select attendance type.";
+
+        setTimeout(function(){
+            status.innerHTML = "";
+        },4000);
+
+        return;
+    }
+
+
+    if(
+        attendance == "TIME IN" ||
+        attendance == "TIME OUT"
+    ){
+
+        if(imageData == ""){
+
+            status.style.color = "red";
+            status.innerHTML =
+            "❌ Please take your selfie first.";
+
+            setTimeout(function(){
+                status.innerHTML = "";
+            },4000);
+
+            return;
+        }
+    }
+
+
+    if(!navigator.geolocation){
+
+        status.style.color = "red";
+        status.innerHTML =
+        "❌ GPS is not supported by your browser.";
+
+        setTimeout(function(){
+            status.innerHTML = "";
+        },4000);
+
+        return;
+    }
+
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML =
+    "⏳ PROCESSING...";
+
+    status.style.color = "#444";
+    status.innerHTML =
+    "📍 Getting GPS location...";
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position){
+
+            var latitude =
+            position.coords.latitude;
+
+            var longitude =
+            position.coords.longitude;
+
+            status.innerHTML =
+            "💾 Saving attendance...";
+
+
+            var formData =
+            new URLSearchParams();
+
+            formData.append(
+                "name",
+                name
+            );
+
+            formData.append(
+                "attendance",
+                attendance
+            );
+
+            formData.append(
+                "imageData",
+                imageData
+            );
+
+            formData.append(
+                "latitude",
+                latitude
+            );
+
+            formData.append(
+                "longitude",
+                longitude
+            );
+
+
+            fetch(SCRIPT_URL,{
+                method:"POST",
+                body:formData,
+                redirect:"follow"
+            })
+
+            .then(function(response){
+
+                if(!response.ok){
+
+                    throw new Error(
+                        "Server error " +
+                        response.status
+                    );
+                }
+
+                return response.text();
+            })
+
+            .then(function(response){
+
+                if(
+                    response.indexOf("❌") > -1
+                ){
+
+                    status.style.color =
+                    "#E53935";
+
+                    status.innerHTML =
+                    response;
+
+                    submitBtn.disabled =
+                    false;
+
+                    submitBtn.innerHTML =
+                    "SUBMIT ATTENDANCE";
+
+                    return;
+                }
+
+
+                if(attendance == "TIME IN"){
+
+                    status.style.color =
+                    "#28A745";
+
+                    status.innerHTML =
+                    "🟢 Time In recorded successfully.";
+                }
+
+
+                if(attendance == "TIME OUT"){
+
+                    status.style.color =
+                    "#1976D2";
+
+                    status.innerHTML =
+                    "🔵 Time Out recorded successfully.";
+                }
+
+
+                if(attendance == "LUNCH OUT"){
+
+                    status.style.color =
+                    "#FF9800";
+
+                    status.innerHTML =
+                    "🍽️ Lunch Out recorded successfully. Enjoy your meal!";
+                }
+
+
+                if(attendance == "LUNCH IN"){
+
+                    status.style.color =
+                    "#4CAF50";
+
+                    status.innerHTML =
+                    "🍴 Lunch In recorded successfully. Welcome back!";
+                }
+
+
+                document.getElementById(
+                    "name"
+                ).selectedIndex = 0;
+
+                document.getElementById(
+                    "attendance"
+                ).selectedIndex = 0;
+
+
+                removeSelfie();
+
+
+                document.getElementById(
+                    "selfieContainer"
+                ).style.display =
+                "block";
+
+                document.getElementById(
+                    "selfieInfo"
+                ).style.display =
+                "none";
+
+
+                submitBtn.disabled =
+                false;
+
+                submitBtn.innerHTML =
+                "SUBMIT ATTENDANCE";
+
+
+                setTimeout(function(){
+
+                    status.innerHTML = "";
+
+                },4000);
+
+            })
+
+            .catch(function(error){
+
+                status.style.color =
+                "#E53935";
+
+                status.innerHTML =
+                "❌ Unable to connect to attendance server. " +
+                error.message;
+
+                submitBtn.disabled =
+                false;
+
+                submitBtn.innerHTML =
+                "SUBMIT ATTENDANCE";
+
+                setTimeout(function(){
+
+                    status.innerHTML = "";
+
+                },6000);
+
+            });
+
+        },
+
+
+        function(){
+
+            status.style.color =
+            "#E53935";
+
+            status.innerHTML =
+            "❌ Please allow GPS location.";
+
+            submitBtn.disabled =
+            false;
+
+            submitBtn.innerHTML =
+            "SUBMIT ATTENDANCE";
+
+            setTimeout(function(){
+
+                status.innerHTML = "";
+
+            },4000);
+
+        },
+
+
+        {
+            enableHighAccuracy:true,
+            timeout:15000,
+            maximumAge:0
+        }
+
+    );
+
+}
+
+
+function updateClock(){
+
+    const now = new Date();
+
+    document.getElementById("currentDate").innerHTML =
+        now.toLocaleDateString("en-US",{
+            month:"long",
+            day:"numeric",
+            year:"numeric"
+        });
+
+    document.getElementById("currentTime").innerHTML =
+        now.toLocaleTimeString("en-US");
+
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+</script>
