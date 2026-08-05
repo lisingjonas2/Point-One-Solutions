@@ -234,43 +234,108 @@ img{
    RESPONSIVE DESIGN
 ======================= */
 
-/* Tablet */
+@media screen and (max-width:768px){
+    .card{
+        width:100%;
+        max-width:500px;
+        padding:20px;
+        margin:10px auto;
+    }
 
-h1{
-    font-size:22px;
+    h1{
+        font-size:26px;
+    }
+
+    select,
+    button,
+    .selfie-btn{
+        font-size:15px;
+    }
 }
 
-select,
-button,
-.selfie-btn{
-    width:100%;
-    font-size:15px;
-}
+@media screen and (max-width:480px){
+    body{
+        padding:0;
+        background:#fff;
+    }
+
+    .card{
+        width:100%;
+        max-width:none;
+        min-height:100vh;
+        margin:0;
+        padding:16px;
+        border:none;
+        border-radius:0;
+    }
+
+    .logo{
+        width:155px;
+        margin:0 auto 8px;
+    }
+
+    .header-date-time{
+        gap:8px;
+        margin:6px 0 14px;
+        flex-wrap:nowrap;
+    }
+
+    .header-date-time span{
+        font-size:22px;
+    }
+
+    .header-date-time strong{
+        font-size:14px;
+        white-space:nowrap;
+    }
+
+    .header-date-time .divider{
+        font-size:20px;
+    }
+
+    h1{
+        margin:14px 0 20px;
+        font-size:22px;
+    }
+
+    select,
+    button,
+    .selfie-btn{
+        width:100%;
+        font-size:15px;
+    }
+
+    #selfiePreview{
+        max-height:240px;
+    }
+
+    button:hover{
+        transform:none;
+        box-shadow:none;
+    }
 }
 
-
-/* Very Small Phones */
 @media screen and (max-width:360px){
+    .logo{
+        width:135px;
+    }
 
-.logo{
-    width:115px;
+    .header-date-time{
+        gap:5px;
+    }
+
+    .header-date-time span{
+        font-size:19px;
+    }
+
+    .header-date-time strong{
+        font-size:12px;
+    }
+
+    h1{
+        font-size:18px;
+    }
 }
-
-.header-item span{
-    font-size:20px;
-}
-
-.header-item strong{
-    font-size:12px;
-}
-
-h1{
-    font-size:18px;
-}
-
-}
-
-
 
 /* =======================
    SELFIE PREVIEW
@@ -393,6 +458,8 @@ h1{
 </div>
 
 <div class="gold-line"></div>
+
+</div>
 
 <h1>EMPLOYEE ATTENDANCE</h1>
 
@@ -827,86 +894,59 @@ function submitData(){
                     );
 
                     return;
-
                 }
 
                 switch(attendance){
 
-                        setTimeout(function(){
-
-    document.getElementById("name").selectedIndex = 0;
-
-    document.getElementById("attendance").selectedIndex = 0;
-
-    removeSelfie();
-
-    document.getElementById("selfieContainer").style.display = "block";
-
-    document.getElementById("selfieInfo").style.display = "none";
-
-}, 2500);
-
-return;
-
                     case "TIME IN":
-
                         showStatus(
                             "🟢 Time In recorded successfully.",
                             "#28A745",
                             4000
                         );
-
                         break;
 
                     case "TIME OUT":
-
                         showStatus(
                             "🔵 Time Out recorded successfully.",
                             "#1976D2",
                             4000
                         );
-
                         break;
 
                     case "LUNCH OUT":
-
                         showStatus(
                             "🍽️ Lunch Out recorded successfully. Enjoy your meal!",
                             "#FF9800",
                             4000
                         );
-
                         break;
 
                     case "LUNCH IN":
-
                         showStatus(
                             "🍴 Lunch In recorded successfully. Welcome back!",
                             "#4CAF50",
                             4000
                         );
-
                         break;
-
                 }
 
-                document.getElementById(
-                    "name"
-                ).selectedIndex = 0;
+                setTimeout(function(){
 
-                document.getElementById(
-                    "attendance"
-                ).selectedIndex = 0;
+                    document.getElementById("name").selectedIndex = 0;
+                    document.getElementById("attendance").selectedIndex = 0;
 
-                removeSelfie();
+                    removeSelfie();
 
-                document.getElementById(
-                    "selfieContainer"
-                ).style.display = "block";
+                    document.getElementById(
+                        "selfieContainer"
+                    ).style.display = "block";
 
-                document.getElementById(
-                    "selfieInfo"
-                ).style.display = "none";
+                    document.getElementById(
+                        "selfieInfo"
+                    ).style.display = "none";
+
+                }, 2500);
 
             })
 
