@@ -19,7 +19,7 @@ html{
 body{
     margin:0;
     padding:8px;
-    width:100%;f
+    width:100%;
     min-height:100vh;
 
     background:linear-gradient(135deg,#0D0D0D,#1F1F1F);
@@ -807,8 +807,7 @@ function checkEmployeeStatus(name){
         new URLSearchParams();
 
     formData.append("action", "getStatus");
-    formData.append("action", "saveAttendance");
-            formData.append("name", name);
+    formData.append("name", name);
 
     fetch(SCRIPT_URL, {
         method:"POST",
@@ -1270,7 +1269,7 @@ function getFastLocation(onSuccess, onError){
     const now = Date.now();
 
     /*
-     * Reuse a recent location for up to 30 seconds.
+     * Reuse a recent location for up to 60 seconds.
      * This avoids waiting for GPS again when the employee retries.
      */
     if(
@@ -1281,7 +1280,7 @@ function getFastLocation(onSuccess, onError){
         return;
     }
 
-    getFastLocation(
+    navigator.geolocation.getCurrentPosition(
 
         function(position){
 
@@ -1291,10 +1290,13 @@ function getFastLocation(onSuccess, onError){
             onSuccess(position);
         },
 
-        onError,
+        function(error){
+
+            onError(error);
+        },
 
         {
-            enableHighAccuracy:true,
+            enableHighAccuracy:false,
             timeout:7000,
             maximumAge:60000
         }
@@ -1391,7 +1393,7 @@ function submitData(){
         );
     }
 
-    navigator.geolocation.getCurrentPosition(
+    getFastLocation(
 
         function(position){
 
@@ -1419,6 +1421,7 @@ function submitData(){
             const formData =
                 new URLSearchParams();
 
+            formData.append("action", "saveAttendance");
             formData.append("name", name);
             formData.append("attendance", attendance);
             formData.append("imageData", imageData);
